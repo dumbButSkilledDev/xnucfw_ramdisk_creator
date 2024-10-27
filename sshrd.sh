@@ -308,6 +308,8 @@ if [ "$oscheck" = 'Darwin' ]; then
         :
             fi
         "$oscheck"/gtar -x --no-overwrite-dir -f sshtars/ssh.tar.gz -C /tmp/SSHRD/
+         mkdir -p /tmp/SSHRD/usr/share/xnucfw/
+         cp ../bootstrap.tar /tmp/SSHRD/usr/share/xnucfw/
     fi
 
     hdiutil detach -force /tmp/SSHRD
@@ -342,6 +344,7 @@ else
         ../"$oscheck"/hfsplus ramdisk.dmg extract usr/lib/libiconv.2.dylib libiconv.2.dylib
         ../"$oscheck"/hfsplus ../work/ramdisk.dmg add libiconv.2.dylib usr/lib/libiconv.2.dylib
         ../"$oscheck"/hfsplus ../work/ramdisk.dmg add libcharset.1.dylib usr/lib/libcharset.1.dylib
+        ../"$oscheck"/hfsplus ../work/ramdisk.dmg add ../../res/bootstrap-iphoneos-arm64.tar usr/share/bootstrap.tar
         cd ..
         rm -rf 12rd
     else
