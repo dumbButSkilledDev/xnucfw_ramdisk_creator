@@ -193,7 +193,7 @@ if [ ! -e work ]; then
     mkdir work
 fi
 
-"$oscheck"/img4tool -e -s other/shsh/"${check}".shsh -m work/IM4M
+touch other/shsh/"${check}".shsh # this is currently for corelilum, so the script is heavliy modified.
 
 cd work
 ../"$oscheck"/pzb -g BuildManifest.plist "$ipswurl"
