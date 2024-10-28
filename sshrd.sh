@@ -349,7 +349,7 @@ else
     else
     :
         fi
-        ../"$oscheck"/hfsplus ../work/ramdisk.dmg add ../../bootstrap.tar usr/share/bootstrap.tar
+        ../"$oscheck"/hfsplus ../work/ramdisk.dmg add /tmp/bootstrap.tar usr/share/bootstrap.tar
         "$oscheck"/hfsplus work/ramdisk.dmg untar sshtars/ssh.tar > /dev/null
     fi
 fi
