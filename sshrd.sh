@@ -82,29 +82,13 @@ elif [ "$1" = 'ssh' ]; then
     "$oscheck"/sshpass -p 'alpine' ssh -o StrictHostKeyChecking=no -p2222 root@localhost || true
     killall iproxy 2>/dev/null | true
     exit
-elif [ "$oscheck" = 'Darwin' ]; then
-    if ! (system_profiler SPUSBDataType 2> /dev/null | grep ' Apple Mobile Device (DFU Mode)' >> /dev/null); then
-        echo "[*] Waiting for device in DFU mode"
-    fi
-    
-    while ! (system_profiler SPUSBDataType 2> /dev/null | grep ' Apple Mobile Device (DFU Mode)' >> /dev/null); do
-        sleep 1
-    done
-else
-    if ! (lsusb 2> /dev/null | grep ' Apple, Inc. Mobile Device (DFU Mode)' >> /dev/null); then
-        echo "[*] Waiting for device in DFU mode"
-    fi
-    
-    while ! (lsusb 2> /dev/null | grep ' Apple, Inc. Mobile Device (DFU Mode)' >> /dev/null); do
-        sleep 1
-    done
 fi
 
 echo "[*] Getting device info and pwning... this may take a second"
-check=$("$oscheck"/irecovery -q | grep CPID | sed 's/CPID: //')
-replace=$("$oscheck"/irecovery -q | grep MODEL | sed 's/MODEL: //')
-deviceid=$("$oscheck"/irecovery -q | grep PRODUCT | sed 's/PRODUCT: //')
-ipswurl=$(curl -sL "https://api.ipsw.me/v4/device/$deviceid?type=ipsw" | "$oscheck"/jq '.firmwares | .[] | select(.version=="'$1'")' | "$oscheck"/jq -s '.[0] | .url' --raw-output)
+check=123445
+replace=iPhone9,2
+deviceid=qwewrweraefw
+ipswurl=https://updates.cdn-apple.com/2024WinterFCS/fullrestores/062-24958/6D3A7DA6-3D8C-4A2B-A70D-2996D06A8930/iPhone_5.5_P3_15.8.3_19H386_Restore.ipsw
 
 if [ -e work ]; then
     rm -rf work
@@ -209,7 +193,6 @@ if [ ! -e work ]; then
     mkdir work
 fi
 
-"$oscheck"/gaster pwn > /dev/null
 "$oscheck"/img4tool -e -s other/shsh/"${check}".shsh -m work/IM4M
 
 cd work
@@ -241,8 +224,10 @@ else
 fi
 
 cd ..
-"$oscheck"/gaster decrypt work/"$(awk "/""${replace}""/{x=1}x&&/iBSS[.]/{print;exit}" work/BuildManifest.plist | grep '<string>' |cut -d\> -f2 |cut -d\< -f1 | sed 's/Firmware[/]dfu[/]//')" work/iBSS.dec
-"$oscheck"/gaster decrypt work/"$(awk "/""${replace}""/{x=1}x&&/iBEC[.]/{print;exit}" work/BuildManifest.plist | grep '<string>' |cut -d\> -f2 |cut -d\< -f1 | sed 's/Firmware[/]dfu[/]//')" work/iBEC.dec
+#"$oscheck"/gaster decrypt work/"$(awk "/""${replace}""/{x=1}x&&/iBSS[.]/{print;exit}" work/BuildManifest.plist | grep '<string>' |cut -d\> -f2 |cut -d\< -f1 | sed 's/Firmware[/]dfu[/]//')" work/iBSS.dec
+img4tool -e --iv "caf46a332fb07c889add5e01a0366c4b" --key "570b0d1b848fa785951f272fde7b96aa4bda6347f5a5fa82e8537db12506bdf5" -o work/iBSS.dec work/"$(awk "/""${replace}""/{x=1}x&&/iBSS[.]/{print;exit}" work/BuildManifest.plist | grep '<string>' |cut -d\> -f2 |cut -d\< -f1 | sed 's/Firmware[/]dfu[/]//')"
+#"$oscheck"/gaster decrypt work/"$(awk "/""${replace}""/{x=1}x&&/iBEC[.]/{print;exit}" work/BuildManifest.plist | grep '<string>' |cut -d\> -f2 |cut -d\< -f1 | sed 's/Firmware[/]dfu[/]//')" work/iBEC.dec
+img4tool -e --iv "bddebc15ca15912151592b681c507340" --key "169237fa524fdafc529c05d2933d6f42faf332ec3f474c573a718faafb83c896" -o work/iBEC.dec work/"$(awk "/""${replace}""/{x=1}x&&/iBEC[.]/{print;exit}" work/BuildManifest.plist | grep '<string>' |cut -d\> -f2 |cut -d\< -f1 | sed 's/Firmware[/]dfu[/]//')"
 "$oscheck"/iBoot64Patcher work/iBSS.dec work/iBSS.patched
 "$oscheck"/img4 -i work/iBSS.patched -o sshramdisk/iBSS.img4 -M work/IM4M -A -T ibss
 "$oscheck"/iBoot64Patcher work/iBEC.dec work/iBEC.patched -b "rd=md0 debug=0x2014e -v wdt=-1 `if [ -z "$2" ]; then :; else echo "$2=$3"; fi` `if [ "$check" = '0x8960' ] || [ "$check" = '0x7000' ] || [ "$check" = '0x7001' ]; then echo "nand-enable-reformat=1 -restore"; fi`" -n
